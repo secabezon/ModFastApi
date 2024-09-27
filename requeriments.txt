@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+databases
+sqlalchemy
+aiosqlite
+pandas
+numpy
+joblib
+matplotlib
+scikit-learn
