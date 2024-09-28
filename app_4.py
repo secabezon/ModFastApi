@@ -1,20 +1,20 @@
 import uvicorn
 from fastapi import FastAPI
-from Houses import House
+from Car import Car
 from joblib import load
 
 
 app=FastAPI()
 
-classifier = load('linear_regression.joblib')
+regressor = load('pipeline.joblib')
 
 @app.get('/')
 def index():
     return{'message': 'hello'}
 
 @app.post('/predict')
-def predict_house_price(data:House):
+def predict_car_price(data:House):
 
-    prediction = classifier.predict()
+    prediction = regressor.predict()
 
     return {'predict':prediction.to_list()}
