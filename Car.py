@@ -38,3 +38,6 @@ class Car(BaseModel):
     type_pickup:  float
     type_sedan:   float
     type_suv:     float
+
+
+    
