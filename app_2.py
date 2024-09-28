@@ -1,40 +1,40 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import databases
-import sqlalchemy
-from contextlib import asynccontextmanager
+import databases#Usado para interactuar asincronicamente, se puede consultar sin bloqueear la BBDD
+import sqlalchemy#Permite interaccion con BBDD con Python, para definir tablas y operaciones
+from contextlib import asynccontextmanager #Asegurarnos que se gestionan conexiones a recursos BBDD y asegurarse que se cierra bien la BBDD
 
-DATABASE_URL = 'sqlite:///./test.db'
-database =databases.Database(DATABASE_URL)
-metadata=sqlalchemy.MetaData()#toda la metadata de los proceso se vaya a una libreria
+DATABASE_URL = 'sqlite:///./test.db'# Se generara un archivo que guardara la BBDD
+database =databases.Database(DATABASE_URL)#Maneja conexiones y trx a la BBDD de la URL
+metadata=sqlalchemy.MetaData()#coleccion de info de la info de la tabla de la BBDD. Obeto que almacenara el esquema de la tabla, se debe meter en las tablas para que entre en esta coleccion
 
 items=sqlalchemy.Table(
-    'items',
-    metadata,
-    sqlalchemy.Column('id',sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column('name',sqlalchemy.String),
-    sqlalchemy.Column('description',sqlalchemy.String)
+    'items',#nombre de tabla
+    metadata, #Objeto que tendra la metadata de la abla
+    sqlalchemy.Column('id',sqlalchemy.Integer, primary_key=True),#columna ID
+    sqlalchemy.Column('name',sqlalchemy.String), #Columna Nombre
+    sqlalchemy.Column('description',sqlalchemy.String) #Columna Descripcion
 )
 
-engine=sqlalchemy.create_engine(DATABASE_URL)
-metadata.create_all(engine)#crea la bbdd
+engine=sqlalchemy.create_engine(DATABASE_URL)#Crea motor de bbdd que permite ejecutar SQL, para ejecutar consultar y crea tablas
+metadata.create_all(engine)#Usa el motor de la bbdd para crear las coleccion definida en la bbdd
 
 class Item(BaseModel):
     name:str
     description: str = None
     
-@asynccontextmanager #Se ejecutan conexiones en paralelo por eso es asincrona
+@asynccontextmanager #Se ejecutan conexiones en paralelo por eso es asincrona, y puede hacer tareas antes o despues del ciclo de vida de la app
 async def lifespan(app:FastAPI):#Conexión a la bbdd y estara activa cuando este activa la app
-    await database.connect()
+    await database.connect()#Abre conexión a la BBDD cuando se inicia la app en FastApi
     #await database_v2.connect() para otra bbdd
-    yield #Cuando termine el despliegue de la API termine, cerrara toda la conexión
-    await database.disconnect()
+    yield #Se para a parte donde la app esta en funcionamiento, no hace nada eso si, solo se deja app corriendo
+    await database.disconnect() #cierra conexion cuando se apaga FastAPI
 
 app=FastAPI()#Se crea app
 
-app.add_event_handler('startup',lambda: database.connect())
-app.add_event_handler('shutdown',lambda: database.disconnect())
-app.dependency_overrides[database]=lifespan
+app.add_event_handler('startup',lambda: database.connect())#Añade manejados de eventos cuando la app inicie
+app.add_event_handler('shutdown',lambda: database.disconnect())#Añade manejados de eventos cuando la app termine
+app.dependency_overrides[database]=lifespan#Sobre escribe dependencias de fastapi, como maneja las bbdd con la funcion creada lifespan, elimina las configuraciones por default de FastAPI, Asegurando que las conexiones se manejen asincronamente y correctamente durante el ciclo de vida de la API
 
 #Simular bbdd
 

@@ -1,8 +1,9 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from Houses import House
 from joblib import load
 import pandas as pd
+from io import StringIO
 
 
 app=FastAPI()
@@ -24,4 +25,13 @@ def predict_house_price(data:House):
 
     prediction = classifier.predict(x_train)
 
+    return {'predict':prediction.to_list()}
+
+@app.post('/predict')
+async def predict_house_price(file:UploadFile = File(...)):
+
+    prediction = classifier.predict(x_train)
+    contents = await file.read()
+    df=pd.read_csv(StringIO(contents.decode('utf-8')))
+    prediction = classifier.predict(x_train)
     return {'predict':prediction.to_list()}
