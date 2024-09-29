@@ -25,25 +25,30 @@ class Item(BaseModel):
     name:str
     description: str = None
     
-@asynccontextmanager #Se ejecutan conexiones en paralelo por eso es asincrona, y puede hacer tareas antes o despues del ciclo de vida de la app
-async def lifespan(app:FastAPI):#Conexión a la bbdd y estara activa cuando este activa la app
-    await database.connect()#Abre conexión a la BBDD cuando se inicia la app en FastApi
-    #await database_v2.connect() para otra bbdd
-    yield #Se para a parte donde la app esta en funcionamiento, no hace nada eso si, solo se deja app corriendo
-    await database.disconnect() #cierra conexion cuando se apaga FastAPI
+# @asynccontextmanager #Se ejecutan conexiones en paralelo por eso es asincrona, y puede hacer tareas antes o despues del ciclo de vida de la app
+# async def lifespan(app:FastAPI):#Conexión a la bbdd y estara activa cuando este activa la app
+#     await database.connect()#Abre conexión a la BBDD cuando se inicia la app en FastApi
+#     #await database_v2.connect() para otra bbdd
+#     yield #Se para a parte donde la app esta en funcionamiento, no hace nada eso si, solo se deja app corriendo
+#     await database.disconnect() #cierra conexion cuando se apaga FastAPI
+
+
 
 app=FastAPI()#Se crea app
+
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
 
 # app.add_event_handler('startup',lambda: database.connect())#Añade manejados de eventos cuando la app inicie
 # app.add_event_handler('shutdown',lambda: database.disconnect())#Añade manejados de eventos cuando la app termine
 # app.dependency_overrides[database]=lifespan#Sobre escribe dependencias de fastapi, como maneja las bbdd con la funcion creada lifespan, elimina las configuraciones por default de FastAPI, Asegurando que las conexiones se manejen asincronamente y correctamente durante el ciclo de vida de la API
 
 #Simular bbdd
-
-fakedb={
-    1:{'name':'item 1', 'description':'This is item 1'},
-    2:{'name':'item 2', 'description':'This is item 2'}
-}
 
 @app.get('/health')
 def index():
