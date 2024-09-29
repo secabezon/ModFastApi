@@ -54,6 +54,10 @@ def read_root():
     return {'message':'Hello, World'}
 
 
+@app.get('/health')
+def index():
+    return{'message': 'hello'}
+
 @app.get('/items/{item_id}', response_model=Item)# Se obtiene un item
 def read_item(item_id:int): 
     with SessionLocal() as session:
