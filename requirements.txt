@@ -12,3 +12,6 @@ numpy
 scikit-learn
 pyngrok
 python-multipart
+pydantic
+contextlib
+aiomysql
