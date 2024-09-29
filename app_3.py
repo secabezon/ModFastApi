@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
+from typing import List
 import databases#Usado para interactuar asincronicamente, se puede consultar sin bloqueear la BBDD
 import sqlalchemy#Permite interaccion con BBDD con Python, para definir tablas y operaciones
 from contextlib import asynccontextmanager
@@ -29,11 +30,11 @@ SessionLocal = sqlalchemy.orm.sessionmaker(autocommit=False, autoflush=False, bi
 
 class Item(BaseModel):
     name:str
-    description: str = None
+    description: str
 
 class ItemCreate(BaseModel):
     name:str
-    description: str = None
+    description: str
 
 class ItemUpdate(BaseModel):
     pass
@@ -98,7 +99,7 @@ def delete_item(item_id:int):
         session.commit()
         return deleted_item._mapping
     
-@app.get('/items/search/{query}', response_model=Item)# Se obtiene un item
+@app.get('/items/search/{query}', response_model=List[Item])# Se obtiene un item
 def search_items(query:str): 
     with SessionLocal() as session:
         query =items.select().where(items.c.name.ilike(f'%{query}%'))
@@ -107,7 +108,7 @@ def search_items(query:str):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Item not found')
         return [db_item._mapping for db_item in db_items]
 
-@app.get('/items/', response_model=Item)# Se obtiene un item
+@app.get('/items/', response_model=List[Item])# Se obtiene un item
 def get_items(skip:int=0, limit:int=10): 
     with SessionLocal() as session:
         query =items.select().offset(skip).limit(limit)
