@@ -1,37 +1,36 @@
 import uvicorn
 from fastapi import FastAPI, UploadFile, File
-from Houses import House
+from Car import Car
 from joblib import load
 import pandas as pd
 from io import StringIO
+import numpy as np
 
 
 app=FastAPI()
 
-classifier = load('linear_regression.joblib')
+regressor = load('pipeline.joblib')
 
-x_train=pd.read_csv('x_train.csv')
-features=pd.read_csv('selected_features.csv')
-features=features['0'].tolist()
-x_train=x_train[features]
+x_train=pd.read_csv('test.csv')
 
+x_train['running']=x_train['running'].apply(lambda x: float(x.replace('km','')) if x[-2:]=='km' else float(x.replace('miles',''))*1.609344)
+x_train.drop(['Id','wheel'], axis=1, inplace=True)
 
 @app.get('/')
 def index():
     return{'message': 'hello'}
 
 @app.post('/predict')
-def predict_house_price(data:House):
+def predict_car_price(data:Car):
+    prediction = regressor.predict(x_train)
+    prediction=np.exp(prediction)
+    return {'predict':prediction.tolist()}
 
-    prediction = classifier.predict(x_train)
+@app.post('/predict_upload')
+async def predict_cars_price(file:UploadFile = File(...)):
 
-    return {'predict':prediction.to_list()}
-
-@app.post('/predict')
-async def predict_house_price(file:UploadFile = File(...)):
-
-    prediction = classifier.predict(x_train)
+    prediction = regressor.predict(x_train)
     contents = await file.read()
     df=pd.read_csv(StringIO(contents.decode('utf-8')))
-    prediction = classifier.predict(x_train)
+    prediction = regressor.predict(x_train)
     return {'predict':prediction.to_list()}
