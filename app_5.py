@@ -19,6 +19,10 @@ x_train.drop(['Id','wheel'], axis=1, inplace=True)
 def index():
     return{'message': 'hello'}
 
+@app.get('/health')
+def index():
+    return{'message': 'hello'}
+
 @app.post('/predict')
 def predict_car_price():
     prediction = regressor.predict(x_train)
