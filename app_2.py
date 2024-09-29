@@ -5,13 +5,21 @@ import sqlalchemy#Permite interaccion con BBDD con Python, para definir tablas y
 from contextlib import asynccontextmanager #Asegurarnos que se gestionan conexiones a recursos BBDD y asegurarse que se cierra bien la BBDD
 
 DATABASE_URL='mysql+pymysql://root:ULbzggxgRxVDgRhWnEHtyqTPADoqjNnZ@autorack.proxy.rlwy.net:21845/railway'
-database =databases.Database(DATABASE_URL)#Maneja conexiones y trx a la BBDD de la URL
-metadata=sqlalchemy.MetaData()#coleccion de info de la info de la tabla de la BBDD. Obeto que almacenara el esquema de la tabla, se debe meter en las tablas para que entre en esta coleccion
+database = databases.Database(DATABASE_URL)
+metadata = sqlalchemy.MetaData()
 
+# Definir la tabla items (debes crear explícitamente la tabla si no existe)
+items = sqlalchemy.Table(
+    "items",
+    metadata,
+    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
+    sqlalchemy.Column("name", sqlalchemy.String(50)),
+    sqlalchemy.Column("description", sqlalchemy.String(200))
+)
 
-engine=sqlalchemy.create_engine(DATABASE_URL)#Crea motor de bbdd que permite ejecutar SQL, para ejecutar consultar y crea tablas
-
-items = sqlalchemy.Table("items", metadata, autoload_with=engine)
+# Crear el motor SQLAlchemy
+engine = sqlalchemy.create_engine(DATABASE_URL)
+metadata.create_all(engine) 
 
 class Item(BaseModel):
     name:str
@@ -26,9 +34,9 @@ async def lifespan(app:FastAPI):#Conexión a la bbdd y estara activa cuando este
 
 app=FastAPI()#Se crea app
 
-app.add_event_handler('startup',lambda: database.connect())#Añade manejados de eventos cuando la app inicie
-app.add_event_handler('shutdown',lambda: database.disconnect())#Añade manejados de eventos cuando la app termine
-app.dependency_overrides[database]=lifespan#Sobre escribe dependencias de fastapi, como maneja las bbdd con la funcion creada lifespan, elimina las configuraciones por default de FastAPI, Asegurando que las conexiones se manejen asincronamente y correctamente durante el ciclo de vida de la API
+# app.add_event_handler('startup',lambda: database.connect())#Añade manejados de eventos cuando la app inicie
+# app.add_event_handler('shutdown',lambda: database.disconnect())#Añade manejados de eventos cuando la app termine
+# app.dependency_overrides[database]=lifespan#Sobre escribe dependencias de fastapi, como maneja las bbdd con la funcion creada lifespan, elimina las configuraciones por default de FastAPI, Asegurando que las conexiones se manejen asincronamente y correctamente durante el ciclo de vida de la API
 
 #Simular bbdd
 
