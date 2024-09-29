@@ -21,7 +21,7 @@ def index():
     return{'message': 'hello'}
 
 @app.post('/predict')
-def predict_car_price(data:Car):
+def predict_car_price():
     prediction = regressor.predict(x_train)
     prediction=np.exp(prediction)
     return {'predict':prediction.tolist()}
@@ -32,5 +32,8 @@ async def predict_cars_price(file:UploadFile = File(...)):
     prediction = regressor.predict(x_train)
     contents = await file.read()
     df=pd.read_csv(StringIO(contents.decode('utf-8')))
-    prediction = regressor.predict(x_train)
-    return {'predict':prediction.to_list()}
+    df['running']=df['running'].apply(lambda x: float(x.replace('km','')) if x[-2:]=='km' else float(x.replace('miles',''))*1.609344)
+    df.drop(['Id','wheel'], axis=1, inplace=True)
+    prediction = regressor.predict(df)
+    prediction=np.exp(prediction)
+    return {'predict':prediction.tolist()}
