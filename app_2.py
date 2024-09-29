@@ -8,16 +8,11 @@ DATABASE_URL='mysql+pymysql://root:ULbzggxgRxVDgRhWnEHtyqTPADoqjNnZ@autorack.pro
 database =databases.Database(DATABASE_URL)#Maneja conexiones y trx a la BBDD de la URL
 metadata=sqlalchemy.MetaData()#coleccion de info de la info de la tabla de la BBDD. Obeto que almacenara el esquema de la tabla, se debe meter en las tablas para que entre en esta coleccion
 
-items=sqlalchemy.Table(
-    'items',#nombre de tabla
-    metadata, #Objeto que tendra la metadata de la abla
-    sqlalchemy.Column('id',sqlalchemy.Integer, primary_key=True),#columna ID
-    sqlalchemy.Column('name',sqlalchemy.String), #Columna Nombre
-    sqlalchemy.Column('description',sqlalchemy.String) #Columna Descripcion
-)
 
 engine=sqlalchemy.create_engine(DATABASE_URL)#Crea motor de bbdd que permite ejecutar SQL, para ejecutar consultar y crea tablas
 metadata.create_all(engine)#Usa el motor de la bbdd para crear las coleccion definida en la bbdd
+
+items = sqlalchemy.Table("items", metadata, autoload_with=engine)
 
 class Item(BaseModel):
     name:str
