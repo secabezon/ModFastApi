@@ -4,7 +4,6 @@ import databases#Usado para interactuar asincronicamente, se puede consultar sin
 import sqlalchemy#Permite interaccion con BBDD con Python, para definir tablas y operaciones
 from contextlib import asynccontextmanager #Asegurarnos que se gestionan conexiones a recursos BBDD y asegurarse que se cierra bien la BBDD
 
-DATABASE_URL = 'sqlite:///./test.db'# Se generara un archivo que guardara la BBDD
 DATABASE_URL='mysql+pymysql://root:ULbzggxgRxVDgRhWnEHtyqTPADoqjNnZ@autorack.proxy.rlwy.net:21845/railway'
 database =databases.Database(DATABASE_URL)#Maneja conexiones y trx a la BBDD de la URL
 metadata=sqlalchemy.MetaData()#coleccion de info de la info de la tabla de la BBDD. Obeto que almacenara el esquema de la tabla, se debe meter en las tablas para que entre en esta coleccion
