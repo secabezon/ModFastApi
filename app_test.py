@@ -24,3 +24,7 @@ async def read_items():
     query = "SELECT * FROM items"
     results = await database.fetch_all(query)
     return results
+
+@app.get('/health')
+def index():
+    return{'message': 'hello'}

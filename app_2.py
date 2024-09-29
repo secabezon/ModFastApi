@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 import databases#Usado para interactuar asincronicamente, se puede consultar sin bloqueear la BBDD
 import sqlalchemy#Permite interaccion con BBDD con Python, para definir tablas y operaciones
