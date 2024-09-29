@@ -10,7 +10,6 @@ metadata=sqlalchemy.MetaData()#coleccion de info de la info de la tabla de la BB
 
 
 engine=sqlalchemy.create_engine(DATABASE_URL)#Crea motor de bbdd que permite ejecutar SQL, para ejecutar consultar y crea tablas
-metadata.create_all(engine)#Usa el motor de la bbdd para crear las coleccion definida en la bbdd
 
 items = sqlalchemy.Table("items", metadata, autoload_with=engine)
 
