@@ -44,6 +44,10 @@ fakedb={
     2:{'name':'item 2', 'description':'This is item 2'}
 }
 
+@app.get('/health')
+def index():
+    return{'message': 'hello'}
+
 @app.get('/')#Apenas se levante la api esto se arrojara
 def read_root():
     return {'message':'Hello, World'}
